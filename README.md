@@ -1,15 +1,15 @@
 # Installation
 
-You will need to install `mutagen`:
+To install, do:
 
 ```
-pip install mutagen
+python setup.py install_scripts
 ```
 
 # Usage
 
 ```
-flacToItunes.py filenames...
+flacToItunes filenames...
 ```
 
 Converts the specified FLAC files to ALAC using `flac` and `afconvert`.
