@@ -27,6 +27,8 @@ import tempfile
 import subprocess
 import os
 
+PLAYLIST = 'flacToItunes'
+
 metadataMapping = {
     'artist': 'artist',
     'album': 'album',
@@ -45,13 +47,14 @@ def mkScriptHead(filename):
   return [
       'set thisFile to POSIX file \"' + filename + '\" as alias',
       'tell application \"Music\"',
-      'set plist to make new user playlist',
+      'set plist to make new user playlist with properties {name:\"' + PLAYLIST + '\"}',
       'set thisTrack to add thisFile to plist',
     ]
 
 def mkScriptTail():
   return [
-      'delete plist',
+      'tell application \"Music\"',
+      'delete playlist \"' + PLAYLIST + '\"',
       'end tell'
     ]
 
@@ -86,7 +89,7 @@ def mkScript(filename, metadata, filename_artwork):
          mkScriptHead(filename) + \
          mkScriptMetadata(metadata) + \
          mkScriptSetArtwork(filename_artwork) + \
-         mkScriptTail()
+         ['end tell']  # mkScriptTail()
 
 def mkOsascriptCommandline(script):
   print(script)
@@ -121,18 +124,22 @@ def addFile(path):
 
     script = mkScript(filename_alac, metadata, filename_artwork)
     script_commandline = mkOsascriptCommandline(script)
+    cleanup = mkScriptTail()
+    cleanup_commandline = mkOsascriptCommandline(cleanup)
     i = 0
-    while True:
+    done = False
+    while not done:
       try:
         subprocess.run(script_commandline, check=True)
+        done = True
       except:
         i = i + 1
         if i < 10:
           print('retrying...')
-          continue
         else:
           raise
-      break
+      finally:
+        subprocess.run(cleanup_commandline, check=True)
     print('added file: ' + filename)
     print(str(metadata))
 
