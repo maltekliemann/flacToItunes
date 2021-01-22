@@ -47,15 +47,7 @@ def mkScriptHead(filename):
   return [
       'set thisFile to POSIX file \"' + filename + '\" as alias',
       'tell application \"Music\"',
-      'set plist to make new user playlist with properties {name:\"' + PLAYLIST + '\"}',
-      'set thisTrack to add thisFile to plist',
-    ]
-
-def mkScriptTail():
-  return [
-      'tell application \"Music\"',
-      'delete playlist \"' + PLAYLIST + '\"',
-      'end tell'
+      'set thisTrack to add thisFile',
     ]
 
 def mkMetadataAssignment(field, value):
@@ -124,8 +116,6 @@ def addFile(path):
 
     script = mkScript(filename_alac, metadata, filename_artwork)
     script_commandline = mkOsascriptCommandline(script)
-    cleanup = mkScriptTail()
-    cleanup_commandline = mkOsascriptCommandline(cleanup)
     i = 0
     done = False
     while not done:
@@ -139,7 +129,7 @@ def addFile(path):
         else:
           raise
       finally:
-        subprocess.run(cleanup_commandline, check=True)
+        pass
     print('added file: ' + filename)
     print(str(metadata))
 
